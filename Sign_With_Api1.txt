@@ -1,0 +1,220 @@
+	SignUp_With_Api
+
+//( XML code)
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SignUpActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SignUp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:textStyle="bold"
+        android:textSize="40dp"
+        android:id="@+id/tvsign"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/tvsign"
+        android:id="@+id/nameregister1"
+        android:hint="Enter Name Here"
+        android:layout_marginTop="30dp"
+        android:padding="20dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/nameregister1"
+        android:id="@+id/emailregister1"
+        android:hint="Enter Email Here"
+        android:layout_marginTop="30dp"
+        android:padding="20dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/emailregister1"
+        android:id="@+id/passwordregister1"
+        android:hint="Enter password Here"
+        android:layout_marginTop="30dp"
+        android:padding="20dp"/>
+
+  
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="register"
+        android:layout_below="@id/addressregister1"
+        android:layout_centerHorizontal="true"
+        android:textStyle="bold"
+        android:id="@+id/register"/>
+
+</RelativeLayout>
+
+//(create Interface here)
+
+  @FormUrlEncoded
+    @POST("post_api_data.php")
+    Call<SignupModel>register(
+
+            @Field("name")String name,
+            @Field("email")String email,
+            @Field("password")String password
+        
+    );
+
+
+
+// (create ResponseModel class Acording to your response)
+
+public class SignupModel {
+    private String msg;
+
+    public SignupModel() {
+    }
+
+    public SignupModel(String msg) {
+        this.msg = msg;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+}
+
+
+// (create Controler class in java)
+
+
+public class SignControler {
+
+    private  static String base_url2 = "paste url here";
+    private static SignControler controler1;
+    Retrofit retrofit3;
+
+    public SignControler() {
+
+        retrofit3 = new Retrofit.Builder()
+                .baseUrl(base_url2)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+    public static synchronized SignControler getInstance(){
+
+        if (controler1 == null)
+            controler1 = new SignControler();
+        return controler1;
+    }
+
+    ApiSet api2(){
+
+        return retrofit3.create(ApiSet.class);
+    }
+
+//( MainActivity .................)
+
+
+public class SignUpActivity extends AppCompatActivity {
+    Button register;
+    EditText nameregister1,emailregister1,passwordregister1;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sign_up);
+
+        register = findViewById(R.id.register);
+        nameregister1 = findViewById(R.id.nameregister1);
+        emailregister1 = findViewById(R.id.emailregister1);
+        passwordregister1 = findViewById(R.id.passwordregister1);
+       
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+//
+                data();
+
+            }
+        });
+
+    }
+
+    private void data() {
+
+        String name = nameregister1.getText().toString();
+        String email = emailregister1.getText().toString();
+        String password = passwordregister1.getText().toString();
+        String address = addressregister1.getText().toString();
+        String phone = phoneregister1.getText().toString();
+
+        if (name.isEmpty()){
+            nameregister1.setError("Enter name here");
+            nameregister1.requestFocus();
+            return;
+        }
+        if (email.isEmpty()){
+            emailregister1.setError("Enter email here");
+            emailregister1.requestFocus();
+            return;
+        }
+        if (password.isEmpty()){
+            passwordregister1.setError("Enter password here");
+            passwordregister1.requestFocus();
+            return;
+        }
+       
+      
+        else {
+                workregister(name,email,password,address,phone);
+
+        }
+
+    }
+
+    private void workregister(String name, String email, String password, String address, String phone) {
+
+        Call<SignupModel> call = SignControler.getInstance()
+                .api2().register(name,email,password,address,phone);
+
+                call.enqueue(new Callback<SignupModel>() {
+                    @Override
+                    public void onResponse(Call<SignupModel> call, Response<SignupModel> response) {
+
+                        if (response.isSuccessful()){
+                            SignupModel sign = response.body();
+                            sign.getMsg();
+                            Toast.makeText(SignUpActivity.this, "succesfully register", Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<SignupModel> call, Throwable t) {
+                        Toast.makeText(SignUpActivity.this, "register Failed", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+    }
+}
+
+
+}
+
+
+
+
